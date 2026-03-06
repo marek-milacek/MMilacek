@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Frekvenční analýza textu - Polednice
+"""
+
+import re
+from collections import Counter
+from pathlib import Path
+
+# Načtení textu
+with open('POLEDNICE.TXT', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+print("=" * 80)
+print("FREKVENČNÍ ANALÝZA TEXTU - POLEDNICE")
+print("=" * 80)
+
+# ============================================================================
+# 1. ZÁKLADNÍ INFORMACE
+# ============================================================================
+print("\n1. ZÁKLADNÍ STATISTIKA")
+print("-" * 80)
+print(f"Délka textu (znaky): {len(text)}")
+print(f"Počet řádků: {len(text.splitlines())}")
+print(f"Počet mezer: {text.count(' ')}")
+
+# ============================================================================
+# 2. ANALÝZA SLOV
+# ============================================================================
+print("\n2. ANALÝZA SLOV")
+print("-" * 80)
+
+# Rozdělení na slova (odstraňujeme interpunkci)
+slova = re.findall(r'\b\w+\b', text.lower())
+print(f"Celkový počet slov: {len(slova)}")
+print(f"Počet různých slov: {len(set(slova))}")
+print(f"Průměrná délka slova: {sum(len(s) for s in slova) / len(slova):.2f}")
+
+# Top 20 nejčastějších slov
+print("\nTop 20 nejčastějších slov:")
+print(f"{'Slovo':<20} {'Frekvence':<12} {'Procenta'}")
+print("-" * 80)
+slova_counter = Counter(slova)
+for slovo, pocet in slova_counter.most_common(20):
+    procenta = (pocet / len(slova)) * 100
+    print(f"{slovo:<20} {pocet:<12} {procenta:>6.2f}%")
+
+# ============================================================================
+# 3. DISTRIBUCE DÉLEK SLOV
+# ============================================================================
+print("\n3. POČET RŮZNÝCH K-PÍSMENNÝCH SLOV")
+print("-" * 80)
+
+delky_slov = {}
+for slovo in set(slova):
+    k = len(slovo)
+    delky_slov[k] = delky_slov.get(k, 0) + 1
+
+print(f"{'Délka (k)':<10} {'Počet různých slov':<25} {'Příklady'}")
+print("-" * 80)
+for k in sorted(delky_slov.keys()):
+    # Найти příklady slov dané délky
+    priklady = [s for s in set(slova) if len(s) == k][:3]
+    priklady_str = ", ".join(priklady)
+    print(f"{k:<10} {delky_slov[k]:<25} {priklady_str}")
+
+# ============================================================================
+# 4. ANALÝZA PÍSMEN
+# ============================================================================
+print("\n4. ANALÝZA PÍSMEN (bez interpunkce a mezer)")
+print("-" * 80)
+
+# Pouze písmena
+pismena = [c for c in text.lower() if c.isalpha()]
+print(f"Celkový počet písmen: {len(pismena)}")
+print(f"Počet různých písmen: {len(set(pismena))}")
+
+# Top 15 nejčastějších písmen
+print("\nTop 15 nejčastějších písmen:")
+print(f"{'Písmeno':<10} {'Frekvence':<12} {'Procenta'}")
+print("-" * 80)
+pismena_counter = Counter(pismena)
+for pismeno, pocet in pismena_counter.most_common(15):
+    procenta = (pocet / len(pismena)) * 100
+    print(f"{pismeno:<10} {pocet:<12} {procenta:>6.2f}%")
+
+# ============================================================================
+# 5. STATISTIKA VOKÁLŮ A KONSONANTŮ
+# ============================================================================
+print("\n5. ANALÝZA VOKÁLŮ A KONSONANTŮ")
+print("-" * 80)
+
+vokaly = "aeioouáéíóúů"
+konsonanty = "bcdfghjklmnpqrstvwxyz"
+
+pocet_vokalu = sum(1 for p in pismena if p in vokaly)
+pocet_konsonantu = sum(1 for p in pismena if p in konsonanty)
+
+print(f"Vokály: {pocet_vokalu} ({(pocet_vokalu/len(pismena)*100):.2f}%)")
+print(f"Konsonanty: {pocet_konsonantu} ({(pocet_konsonantu/len(pismena)*100):.2f}%)")
+
+vokaly_counter = Counter([p for p in pismena if p in vokaly])
+print("\nFrekvence vokálů:")
+for vokal, pocet in sorted(vokaly_counter.items(), key=lambda x: x[1], reverse=True):
+    print(f"  {vokal}: {pocet} ({(pocet/pocet_vokalu*100):.2f}%)")
+
+# ============================================================================
+# 6. DALŠÍ ZAJÍMAVÉ STATISTIKY
+# ============================================================================
+print("\n6. DALŠÍ STATISTIKY")
+print("-" * 80)
+
+# Nejdelší slova
+delsi_slova = sorted(set(slova), key=len, reverse=True)[:5]
+print(f"Nejdelší slova: {', '.join(delsi_slova)}")
+
+# Nejkratší slova
+kratsi_slova = sorted(set(slova), key=len)[:5]
+print(f"Nejkratší slova: {', '.join(kratsi_slova)}")
+
+# Slova, která se opakují nejčastěji
+print("\nSlova s největší frekvencí:")
+for slovo, pocet in slova_counter.most_common(10):
+    print(f"  '{slovo}': {pocet}x")
+
+print("\n" + "=" * 80)
