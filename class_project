@@ -1,0 +1,81 @@
+class SpravceCisel:
+    def __init__(self):
+        self.cisla = []
+
+    # 1) přidání čísla
+    def pridej_cislo(self, cislo):
+        if not isinstance(cislo, (int, float)):
+            raise ValueError("Musíš zadat číslo (int nebo float).")
+        self.cisla.append(cislo)
+
+    # 2) odebrání čísla
+    def odeber_cislo(self, cislo):
+        if cislo in self.cisla:
+            self.cisla.remove(cislo)
+            return True
+        return False
+
+    # 3) výpočet statistiky (součet, průměr, minimum, maximum)
+    def statistika(self):
+        if not self.cisla:
+            return {
+                "pocet": 0,
+                "soucet": 0,
+                "prumer": None,
+                "minimum": None,
+                "maximum": None
+            }
+
+        soucet = sum(self.cisla)
+        return {
+            "pocet": len(self.cisla),
+            "soucet": soucet,
+            "prumer": soucet / len(self.cisla),
+            "minimum": min(self.cisla),
+            "maximum": max(self.cisla)
+        }
+
+    # bonus: hezký výpis
+    def vypis(self):
+        return f"Aktuální čísla: {self.cisla}"
+
+
+class RozsirenySpravceCisel(SpravceCisel):
+    # Unikátní vlastnost: Vyhledání nejbližšího čísla
+    def nejblizsi_cislo(self, hodnota):
+        if not self.cisla:
+            return None
+        return min(self.cisla, key=lambda x: abs(x - hodnota))
+
+    # Unikátní vlastnost: Násobení všech čísel faktorem
+    def nasob_cisla(self, faktor):
+        self.cisla = [cislo * faktor for cislo in self.cisla]
+
+
+if __name__ == "__main__":
+    # První instance
+    spravce1 = SpravceCisel()
+    spravce1.pridej_cislo(10)
+    spravce1.pridej_cislo(20)
+    print("Správce 1:", spravce1.vypis())
+    print("Statistika správce 1:", spravce1.statistika())
+
+    # Druhá instance
+    spravce2 = SpravceCisel()
+    spravce2.pridej_cislo(5)
+    spravce2.pridej_cislo(15)
+    spravce2.pridej_cislo(25)
+    print("Správce 2:", spravce2.vypis())
+    print("Statistika správce 2:", spravce2.statistika())
+
+    # Instance rozšířené třídy
+    rozsireny_spravce = RozsirenySpravceCisel()
+    rozsireny_spravce.pridej_cislo(7)
+    rozsireny_spravce.pridej_cislo(14)
+    rozsireny_spravce.pridej_cislo(21)
+
+    print("Rozšířený správce - původní čísla:", rozsireny_spravce.vypis())
+    print("Nejbližší číslo k 10:", rozsireny_spravce.nejblizsi_cislo(10))
+
+    rozsireny_spravce.nasob_cisla(2)
+    print("Rozšířený správce - po násobení faktorem 2:", rozsireny_spravce.vypis())
