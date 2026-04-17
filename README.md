@@ -1,1 +1,1 @@
-# ***Scool for my school***
+# ***Repo for my school***
