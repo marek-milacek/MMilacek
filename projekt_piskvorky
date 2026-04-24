@@ -1,0 +1,152 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class Piskvorky:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Piškvorky")
+        self.root.resizable(False, False)
+        self.root.configure(bg="#1d1f33")
+
+        self.current_player = "X"
+        self.board = [None] * 9
+        self.buttons = []
+
+        self.create_widgets()
+        self.update_status()
+
+    def create_widgets(self):
+        self.status_label = tk.Label(
+            self.root,
+            text="",
+            font=("Segoe UI", 16, "bold"),
+            fg="#f7f7ff",
+            bg="#2e314a",
+            padx=16,
+            pady=12,
+            relief="ridge",
+            bd=3
+        )
+        self.status_label.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=12, pady=(12, 8))
+
+        board_frame = tk.Frame(self.root, bg="#1d1f33")
+        board_frame.grid(row=1, column=0, columnspan=3, padx=12, pady=0)
+
+        for index in range(9):
+            button = tk.Button(
+                board_frame,
+                text="",
+                width=5,
+                height=2,
+                font=("Segoe UI", 28, "bold"),
+                bg="#f3f4f6",
+                fg="#1e1f33",
+                activebackground="#ffb703",
+                activeforeground="#1e1f33",
+                relief="raised",
+                bd=4,
+                command=lambda idx=index: self.on_click(idx)
+            )
+            button.grid(row=index // 3, column=index % 3, padx=6, pady=6, ipadx=6, ipady=6)
+            self.buttons.append(button)
+
+        self.reset_button = tk.Button(
+            self.root,
+            text="Nová hra",
+            font=("Segoe UI", 13, "bold"),
+            bg="#ff6b6b",
+            fg="#ffffff",
+            activebackground="#ff8787",
+            activeforeground="#ffffff",
+            relief="raised",
+            bd=3,
+            padx=12,
+            pady=8,
+            command=self.reset_game
+        )
+        self.reset_button.grid(row=2, column=0, pady=(8, 14), sticky="ew", padx=(12, 6))
+
+        self.quit_button = tk.Button(
+            self.root,
+            text="Ukončit",
+            font=("Segoe UI", 13, "bold"),
+            bg="#4f5d75",
+            fg="#ffffff",
+            activebackground="#6c7a92",
+            activeforeground="#ffffff",
+            relief="raised",
+            bd=3,
+            padx=12,
+            pady=8,
+            command=self.quit_game
+        )
+        self.quit_button.grid(row=2, column=2, pady=(8, 14), sticky="ew", padx=(6, 12))
+
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=0)
+        self.root.grid_columnconfigure(2, weight=1)
+
+    def on_click(self, index):
+        if self.board[index] is not None:
+            return
+
+        self.board[index] = self.current_player
+        self.buttons[index].config(text=self.current_player, disabledforeground="#1e1f33")
+        self.buttons[index].config(state="disabled")
+
+        winner = self.check_winner()
+        if winner:
+            self.end_game(f"Vyhrál hráč {winner}!")
+            return
+
+        if all(self.board):
+            self.end_game("Remíza! Hra skončila nerozhodně.")
+            return
+
+        self.current_player = "O" if self.current_player == "X" else "X"
+        self.update_status()
+
+    def update_status(self):
+        self.status_label.config(text=f"Tah hráče: {self.current_player}")
+
+    def check_winner(self):
+        lines = [
+            (0, 1, 2),
+            (3, 4, 5),
+            (6, 7, 8),
+            (0, 3, 6),
+            (1, 4, 7),
+            (2, 5, 8),
+            (0, 4, 8),
+            (2, 4, 6)
+        ]
+        for a, b, c in lines:
+            if self.board[a] and self.board[a] == self.board[b] == self.board[c]:
+                self.winning_line = (a, b, c)
+                return self.board[a]
+        self.winning_line = None
+        return None
+
+    def end_game(self, message):
+        self.status_label.config(text=message)
+        for button in self.buttons:
+            button.config(state="disabled")
+        if getattr(self, "winning_line", None):
+            for idx in self.winning_line:
+                self.buttons[idx].config(bg="#ffd166")
+        messagebox.showinfo("Konec hry", message)
+
+    def reset_game(self):
+        self.current_player = "X"
+        self.board = [None] * 9
+        for button in self.buttons:
+            button.config(text="", state="normal", bg="#f3f4f6")
+        self.update_status()
+
+    def quit_game(self):
+        self.root.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    Piskvorky(root)
+    root.mainloop()
